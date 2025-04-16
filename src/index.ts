@@ -13,10 +13,6 @@ const app: Express = express();
 app.use(express.json());
 app.use("/api/v1", rootRouter);
 
-// app.on("error", (error) => {
-//   console.log("hello world");
-// });
-//
 export const prismaClient = new PrismaClient({
   log: ["query"],
 });
