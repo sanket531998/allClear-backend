@@ -18,6 +18,12 @@ enum Role {
   USER
 }
 
+enum PremiumCategoriesTypes {
+    BASIC
+    PREMIUM
+    PREMIUM_PLUS
+}
+
 model User {
   id          Int    @id @default(autoincrement())
   email       String @unique
@@ -28,6 +34,7 @@ model User {
   role        Role   @default(USER)
 
   categories Categories[] // Add this line to establish the relation
+  articles Articles[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -41,8 +48,10 @@ model Categories {
   subCategory String
   description String @db.Text
 
-  createdBy     Int // Change String to Int since User ID is an Int
+  createdBy     Int // User ID is an Int
   createdByUser User @relation(fields: [createdBy], references: [id])
+
+  articles Articles[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -50,10 +59,42 @@ model Categories {
   @@map("categories")
 }
 
-// model Articles {
-//   articlesId Int @id @default(autoincrement())
-//   title String
-//   autor String
+model PremiumCategories {
+  premiumCategoriesTypeId Int @id @default(autoincrement())
+  premiumCategory PremiumCategoriesTypes  @unique
+  description String
 
-//   @@map("articles")
-// }
+  articles Articles[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@map("premiumCategories")
+}
+
+model Articles {
+  articlesId Int @id @default(autoincrement())
+  title String
+  author String
+  content String  @db.Text 
+
+  categoryType Int
+  categoryTypeReference Categories @relation(fields: [categoryType], references: [categoryId])
+
+  addedBy Int
+  addedByUser User @relation(fields: [addedBy], references: [id])
+
+  premiumCategoryType Int
+  premiumCategoryReference PremiumCategories @relation(fields: [premiumCategoryType] , references: [premiumCategoriesTypeId])
+
+   
+  location String 
+  totalReads Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@map("articles")
+}

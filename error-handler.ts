@@ -2,13 +2,14 @@ import { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { ErrorCodes, HttpExceptions } from "./src/execptions/root.exception";
 import { BadRequestException } from "./src/execptions/bad-request";
+import { InternalException } from "./src/execptions/internal.exception";
 
 export const errorHandler = (
-  sanket: (req: Request, res: Response, next: NextFunction) => Promise<void>
+  method: (req: Request, res: Response, next: NextFunction) => Promise<void>
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await sanket(req, res, next);
+      await method(req, res, next);
     } catch (error: any) {
       let exception: HttpExceptions;
 
@@ -22,17 +23,12 @@ export const errorHandler = (
             error?.errors
           );
         } else {
-          exception = new BadRequestException(
+          exception = new InternalException(
             "Unprocessible entity",
             ErrorCodes.INTERNAL_EXCEPTION,
             error
           );
         }
-        // exception = new InternalException(
-        //   "something went wrong",
-        //   error,
-        //   ErrorCodes.INTERNAL_EXCEPTIONS
-        // );
       }
 
       next(exception);

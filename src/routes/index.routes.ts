@@ -4,6 +4,7 @@ import { articlesRouter, articlesRouterAdmin } from "./articles.route";
 import { AdminMiddleware } from "../middlewares/admin.middleware";
 import authMiddleware from "../middlewares/auth.middleware";
 import { categoriesRouter } from "./categories.route";
+import { PremiumCategoriesRouter } from "./premium-categories.route";
 
 const rootRouter: Router = Router();
 
@@ -23,6 +24,12 @@ rootRouter.use(
   "/categories/admin",
   [authMiddleware, AdminMiddleware],
   categoriesRouter
+);
+
+rootRouter.use(
+  "/premimumCategories/admin",
+  [authMiddleware, AdminMiddleware],
+  PremiumCategoriesRouter
 );
 
 export default rootRouter;
