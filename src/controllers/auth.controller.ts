@@ -8,14 +8,50 @@ import { ErrorCodes } from "../execptions/root.exception";
 import { UnAuthorizedException } from "../execptions/unauthorized";
 import * as jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../secrets";
+import { sendEmail } from "../services/email.service";
+import { InternalException } from "../execptions/internal.exception";
+import { EmailSchema } from "../schema/articles.schema";
+
+export const sendOTPViaEmail = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const verifiedEmail = EmailSchema.parse(req.body);
+  let emailStatus;
+  let otp = Math.floor((Math.random() + 1) * 100000);
+  try {
+    emailStatus = await sendEmail(verifiedEmail.email, otp);
+  } catch (error) {
+    throw new InternalException(`Error while sending email ${error}`, 500);
+  }
+
+  res.status(200).json({ response: emailStatus, otp: otp });
+};
+
+export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
+  const { userSentOtp, apiResponseOtp } = req.body;
+
+  try {
+    if (userSentOtp === apiResponseOtp) {
+      res.status(200).json({ success: "true" });
+    } else {
+      throw new UnAuthorizedException("Incorrect OTP", 404, 404);
+    }
+  } catch (error) {
+    throw new UnAuthorizedException("Incorrect OTP", 404, 404);
+  }
+};
 
 // to create a new account
 export const signUp = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   const validatedData = userSignUpSchema.parse(req.body);
+
+  // Verify email
+
   const hashedPassword = hashSync(validatedData?.password, 10);
 
   const user = await prismaClient.user.findFirst({
@@ -104,6 +140,9 @@ export const passwordLogin = async (
 
 // Login with email and otp
 export const otpLogin = async () => {};
+
+// Auth 2.0 login with google
+export const auth2Login = async () => {};
 
 export const resetPassword = async () => {};
 

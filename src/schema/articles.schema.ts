@@ -11,3 +11,7 @@ export const AddArticlesSchema = z.object({
   categorySubType: z.string(),
   premiumCategoryType: z.string().optional().nullable(),
 });
+
+export const EmailSchema = z.object({
+  email: z.string().email(),
+});
