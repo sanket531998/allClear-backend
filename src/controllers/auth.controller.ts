@@ -1,4 +1,3 @@
-// export default const login = () => {};
 import { NextFunction, Request, Response } from "express";
 import { prismaClient } from "..";
 import { signInSchema, userSignUpSchema } from "../schema/user.schema";
@@ -19,13 +18,19 @@ export const sendOTPViaEmail = async (
   const verifiedEmail = EmailSchema.parse(req.body);
   let emailStatus;
   let otp = Math.floor((Math.random() + 1) * 100000);
+
   try {
     emailStatus = await sendEmail(verifiedEmail.email, otp);
   } catch (error) {
     throw new InternalException(`Error while sending email ${error}`, 500);
   }
 
-  res.status(200).json({ response: emailStatus, otp: otp });
+  res.status(200).json({
+    response: emailStatus,
+    success: true,
+    status: "email sent successfully",
+    otp: otp,
+  });
 };
 
 export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
@@ -33,7 +38,7 @@ export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
 
   try {
     if (userSentOtp === apiResponseOtp) {
-      res.status(200).json({ success: "true" });
+      res.status(200).json({ success: true, status: "otp matched" });
     } else {
       throw new UnAuthorizedException("Incorrect OTP", 404, 404);
     }
